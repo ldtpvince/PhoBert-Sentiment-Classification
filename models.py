@@ -75,7 +75,7 @@ class RobertaForAIViVN(BertPreTrainedModel):
 
        outputs = self.roberta(input_ids,
                             attention_mask=attention_mask,
-                            token_type_ids=token_type_ids,
+#                            token_type_ids=token_type_ids,
                             position_ids=position_ids,
                             head_mask=head_mask)
        cls_output = torch.cat((outputs[2][-1][:,0, ...],outputs[2][-2][:,0, ...], outputs[2][-3][:,0, ...], outputs[2][-4][:,0, ...]),-1)
