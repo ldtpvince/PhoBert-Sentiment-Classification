@@ -4,7 +4,7 @@ from transformers import *
 
 class AlbertPreTrainedModel(PreTrainedModel):
    config_class = AlbertConfig
-   pretrained_model_archive_map = ALBERT_PRETRAINED_MODEL_ARCHIVE_MAP
+   pretrained_model_archive_list = ALBERT_PRETRAINED_MODEL_ARCHIVE_LIST
    base_model_prefix = "albert"
 
    def _init_weights(self, module):
@@ -60,7 +60,7 @@ class BertForAIViVN(BertPreTrainedModel):
 
 class RobertaForAIViVN(BertPreTrainedModel):
    config_class = RobertaConfig
-   pretrained_model_archive_map = ROBERTA_PRETRAINED_MODEL_ARCHIVE_MAP
+   pretrained_model_archive_list = ROBERTA_PRETRAINED_MODEL_ARCHIVE_LIST
    base_model_prefix = "roberta"
    def __init__(self, config):
        super(RobertaForAIViVN, self).__init__(config)
@@ -75,7 +75,7 @@ class RobertaForAIViVN(BertPreTrainedModel):
 
        outputs = self.roberta(input_ids,
                             attention_mask=attention_mask,
-#                            token_type_ids=token_type_ids,
+                            token_type_ids=token_type_ids,
                             position_ids=position_ids,
                             head_mask=head_mask)
        cls_output = torch.cat((outputs[2][-1][:,0, ...],outputs[2][-2][:,0, ...], outputs[2][-3][:,0, ...], outputs[2][-4][:,0, ...]),-1)
