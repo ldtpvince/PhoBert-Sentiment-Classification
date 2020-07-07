@@ -4,7 +4,7 @@ from transformers import *
 
 class AlbertPreTrainedModel(PreTrainedModel):
    config_class = AlbertConfig
-   pretrained_model_archive_list = ALBERT_PRETRAINED_MODEL_ARCHIVE_LIST
+   pretrained_model_archive_map = ALBERT_PRETRAINED_MODEL_ARCHIVE_MAP
    base_model_prefix = "albert"
 
    def _init_weights(self, module):
@@ -60,7 +60,7 @@ class BertForAIViVN(BertPreTrainedModel):
 
 class RobertaForAIViVN(BertPreTrainedModel):
    config_class = RobertaConfig
-   pretrained_model_archive_list = ROBERTA_PRETRAINED_MODEL_ARCHIVE_LIST
+   pretrained_model_archive_map = ROBERTA_PRETRAINED_MODEL_ARCHIVE_MAP
    base_model_prefix = "roberta"
    def __init__(self, config):
        super(RobertaForAIViVN, self).__init__(config)

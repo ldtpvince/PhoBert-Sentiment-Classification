@@ -48,7 +48,7 @@ seed_everything(69)
 config = RobertaConfig.from_pretrained(
     args.config_path,
     output_hidden_states=True,
-    num_labels=1
+    num_labels=3
 )
 
 model_bert = RobertaForAIViVN.from_pretrained(args.pretrained_path, config=config)
@@ -120,8 +120,15 @@ for fold, (train_idx, val_idx) in enumerate(splits):
         optimizer.zero_grad()
         pbar = tqdm(enumerate(train_loader),total=len(train_loader),leave=False)
         for i,(x_batch, y_batch) in pbar:
+            print("x_batchSize={}&x_batchSize={}&y_batch={}\n".format(len(x_batch), len(x_batch[0]), len(y_batch)))
+            # print(y_batch.float().data.cpu().numpy())
+            # print(x_batch.float().data.cpu().numpy())
+            #print("x_batch={}&y_batch={}".format(x_batch, y_batch))
             model_bert.train()
+            print((x_batch>0).data.cpu().numpy())
             y_pred = model_bert(x_batch.cuda(), attention_mask=(x_batch>0).cuda())
+            print(type(y_pred).__name__)
+            # print(y_pred.view(-1).float().data.cpu().numpy())
             loss =  F.binary_cross_entropy_with_logits(y_pred.view(-1).cuda(),y_batch.float().cuda())
             loss = loss.mean()
             loss.backward()
