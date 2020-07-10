@@ -21,6 +21,8 @@ from fairseq.data.encoders.fastbpe import fastBPE
 from fairseq.data import Dictionary
 from vncorenlp import VnCoreNLP
 from utils import *
+from sklearn.utils.extmath import softmax
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--train_path', type=str, default='./data/train.csv')
@@ -120,16 +122,9 @@ for fold, (train_idx, val_idx) in enumerate(splits):
         optimizer.zero_grad()
         pbar = tqdm(enumerate(train_loader),total=len(train_loader),leave=False)
         for i,(x_batch, y_batch) in pbar:
-            print("x_batchSize={}&x_batchSize={}&y_batch={}\n".format(len(x_batch), len(x_batch[0]), len(y_batch)))
-            # print(y_batch.float().data.cpu().numpy())
-            # print(x_batch.float().data.cpu().numpy())
-            #print("x_batch={}&y_batch={}".format(x_batch, y_batch))
             model_bert.train()
-            print((x_batch>0).data.cpu().numpy())
             y_pred = model_bert(x_batch.cuda(), attention_mask=(x_batch>0).cuda())
-            print(type(y_pred).__name__)
-            # print(y_pred.view(-1).float().data.cpu().numpy())
-            loss =  F.binary_cross_entropy_with_logits(y_pred.view(-1).cuda(),y_batch.float().cuda())
+            loss =  F.cross_entropy(y_pred.cuda(),y_batch.long().cuda())
             loss = loss.mean()
             loss.backward()
             if i % args.accumulation_steps == 0 or i == len(pbar) - 1:
@@ -149,11 +144,28 @@ for fold, (train_idx, val_idx) in enumerate(splits):
             y_pred = model_bert(x_batch.cuda(), attention_mask=(x_batch>0).cuda())
             y_pred = y_pred.squeeze().detach().cpu().numpy()
             val_preds = np.atleast_1d(y_pred) if val_preds is None else np.concatenate([val_preds, np.atleast_1d(y_pred)])
-        val_preds = sigmoid(val_preds)
-
+        val_preds = softmax(val_preds)
         best_th = 0
-        score = f1_score(y[val_idx], val_preds > 0.5)
-        print(f"\nAUC = {roc_auc_score(y[val_idx], val_preds):.4f}, F1 score @0.5 = {score:.4f}")
+        val = [0]
+        print(y[val_idx])
+        print("abc")
+        print(val_preds)
+        rows = len(val_preds) 
+        column = len(val_preds[0])
+        val = [3]
+        for i in range(rows): 
+          max1 = 0
+          index = 0
+          for j in range(column): 
+            if val_preds[i][j] > max1 : 
+              max1 = val_preds[i][j]
+              index = j
+          val.append(index)
+        val.pop(0)
+        print(val)
+        score = f1_score(y[val_idx], val, average='macro')
+        print(score)
+        print(f"\nAUC = {roc_auc_score(y[val_idx], val_preds, average='macro', multi_class = 'ovr'):.4f}, F1 score @0.5 = {score:.4f}")
         if score >= best_score:
             torch.save(model_bert.state_dict(),os.path.join(args.ckpt_path, f"model_{fold}.bin"))
             best_score = score
